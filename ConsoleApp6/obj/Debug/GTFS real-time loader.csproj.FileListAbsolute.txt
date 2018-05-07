@@ -1,0 +1,9 @@
+C:\Users\Vince\source\repos\ConsoleApp6\ConsoleApp6\bin\Debug\ConsoleApp6.exe.config
+C:\Users\Vince\source\repos\ConsoleApp6\ConsoleApp6\bin\Debug\ConsoleApp6.exe
+C:\Users\Vince\source\repos\ConsoleApp6\ConsoleApp6\bin\Debug\ConsoleApp6.pdb
+C:\Users\Vince\source\repos\ConsoleApp6\ConsoleApp6\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Vince\source\repos\ConsoleApp6\ConsoleApp6\obj\Debug\GTFS real-time loader.csprojResolveAssemblyReference.cache
+C:\Users\Vince\source\repos\ConsoleApp6\ConsoleApp6\obj\Debug\GTFS real-time loader.csproj.CoreCompileInputs.cache
+C:\Users\Vince\source\repos\ConsoleApp6\ConsoleApp6\obj\Debug\GTFS real-time loader.csproj.CopyComplete
+C:\Users\Vince\source\repos\ConsoleApp6\ConsoleApp6\obj\Debug\ConsoleApp6.exe
+C:\Users\Vince\source\repos\ConsoleApp6\ConsoleApp6\obj\Debug\ConsoleApp6.pdb
