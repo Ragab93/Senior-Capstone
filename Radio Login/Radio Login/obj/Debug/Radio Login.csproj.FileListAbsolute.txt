@@ -1,0 +1,7 @@
+c:\users\vince\source\repos\Radio Login\Radio Login\bin\Debug\Radio Login.exe.config
+c:\users\vince\source\repos\Radio Login\Radio Login\bin\Debug\Radio Login.exe
+c:\users\vince\source\repos\Radio Login\Radio Login\bin\Debug\Radio Login.pdb
+c:\users\vince\source\repos\Radio Login\Radio Login\obj\Debug\Radio Login.csprojResolveAssemblyReference.cache
+c:\users\vince\source\repos\Radio Login\Radio Login\obj\Debug\Radio Login.csproj.CoreCompileInputs.cache
+c:\users\vince\source\repos\Radio Login\Radio Login\obj\Debug\Radio Login.exe
+c:\users\vince\source\repos\Radio Login\Radio Login\obj\Debug\Radio Login.pdb

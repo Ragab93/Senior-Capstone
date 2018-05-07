@@ -1,0 +1,2 @@
+agency_id,agency_name,agency_url,agency_timezone,agency_lang,agency_phone,agency_fare_url
+TARTA,Toledo Area Regional Transit Authority,http://www.tarta.com,America/New_York,En,419-243-7433,http://tarta.com/rider-information/fares-passes/

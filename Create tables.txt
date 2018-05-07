@@ -1,0 +1,167 @@
+CREATE TABLE [dbo].[FeedMessage] (
+    [FM_Id] INT NOT NULL,
+    PRIMARY KEY CLUSTERED ([FM_Id] ASC)
+);
+
+
+
+CREATE TABLE [dbo].[FeedHeader] (
+    [FH_Id]                 INT           NOT NULL,
+    [FM_Id]                 INT           NOT NULL,
+    [gtds_realtime_version] NVARCHAR (50) NOT NULL,
+    [incrementality]        NVARCHAR (20) NOT NULL,
+    [timestamp]             NUMERIC (20)  NOT NULL,
+    PRIMARY KEY CLUSTERED ([FH_Id] ASC),
+    UNIQUE NONCLUSTERED ([FM_Id] ASC),
+    CONSTRAINT [FK_FeedHeader_FeedMessage] FOREIGN KEY ([FM_Id]) REFERENCES [dbo].[FeedMessage] ([FM_Id]),
+    CHECK ([incrementality]='DIFFERENTIAL' OR [incrementality]='FULL_DATASET')
+);
+
+
+
+CREATE TABLE [dbo].[FeedEntity] (
+    [FE_Id] INT  NOT NULL,
+    [FM_Id] INT  NOT NULL,
+    [Id]    TEXT NULL,
+    PRIMARY KEY CLUSTERED ([FE_Id] ASC),
+    CONSTRAINT [FK_FeedEntity_FeedMessage] FOREIGN KEY ([FM_Id]) REFERENCES [dbo].[FeedMessage] ([FM_Id])
+);
+
+
+CREATE TABLE [dbo].[Alert] (
+    [A_Id]   INT        NOT NULL,
+    [Cause]  NCHAR (25) NULL,
+    [Effect] NCHAR (25) NULL,
+    [FE_Id]  INT        NOT NULL,
+    PRIMARY KEY CLUSTERED ([A_Id] ASC),
+    UNIQUE NONCLUSTERED ([FE_Id] ASC),
+    CONSTRAINT [FK_Alert_FeedEntity] FOREIGN KEY ([FE_Id]) REFERENCES [dbo].[FeedEntity] ([FE_Id]),
+    CHECK ([Cause]='UNKNOWN_CAUSE' OR [Cause]='OTHER_CAUSE' OR [Cause]='TECHNICAL_PROBLEM' OR [Cause]='STRIKE' OR [Cause]='DEMONSTRATION' OR [Cause]='ACCIDENT' OR [Cause]='HOLIDAY' OR [Cause]='WEATHER' OR [Cause]='MAINTENANCE' OR [Cause]='CONSTRUCTION' OR [Cause]='POLICE_ACTIVITY' OR [Cause]='MEDICAL_EMERGENCY'),
+    CHECK ([Effect]='NO_SERVICE' OR [Effect]='REDUCED_SERVICE' OR [Effect]='SIGNIFICANT_DELAYS' OR [Effect]='DETOUR' OR [Effect]='ADDITIONAL_SERVICE' OR [Effect]='MODIFIED_SERVICE' OR [Effect]='OTHER_EFFECT' OR [Effect]='UNKNOWN_EFFECT' OR [Effect]='STOP_MOVED')
+);
+
+
+CREATE TABLE [dbo].[VehiclePosition] (
+    [VP_Id]                 INT           NOT NULL,
+    [FE_Id]                 INT           NOT NULL,
+    [current_stop_sequence] INT           NULL,
+    [stop_id]               NVARCHAR (50) NULL,
+    [timestamp]             NUMERIC (20)  NULL,
+    PRIMARY KEY CLUSTERED ([VP_Id] ASC),
+    UNIQUE NONCLUSTERED ([FE_Id] ASC),
+    UNIQUE NONCLUSTERED ([FE_Id] ASC),
+    CONSTRAINT [FK_VehiclePosition_FeedEntity] FOREIGN KEY ([FE_Id]) REFERENCES [dbo].[FeedEntity] ([FE_Id])
+);
+
+
+CREATE TABLE [dbo].[TripUpdate] (
+    [TP_Id]     INT          NOT NULL,
+    [FE_Id]     INT          NOT NULL,
+    [timestamp] NUMERIC (20) NULL,
+    [delay]     INT          NULL,
+    PRIMARY KEY CLUSTERED ([TP_Id] ASC),
+    UNIQUE NONCLUSTERED ([FE_Id] ASC),
+    CONSTRAINT [FK_TripUpdate_FeedEntity] FOREIGN KEY ([FE_Id]) REFERENCES [dbo].[FeedEntity] ([FE_Id])
+);
+
+
+CREATE TABLE [dbo].[TranslatedMessage] (
+    [TransM_Id] INT NOT NULL,
+    [A_Id]      INT NOT NULL,
+    PRIMARY KEY CLUSTERED ([TransM_Id] ASC),
+    UNIQUE NONCLUSTERED ([A_Id] ASC),
+    CONSTRAINT [FK_TranslatedMessage_Alert] FOREIGN KEY ([A_Id]) REFERENCES [dbo].[Alert] ([A_Id])
+);
+
+
+CREATE TABLE [dbo].[Translation] (
+    [Trans_Id]  INT  NOT NULL,
+    [TransM_Id] INT  NOT NULL,
+    [text]      TEXT NOT NULL,
+    [language]  TEXT NULL,
+    PRIMARY KEY CLUSTERED ([Trans_Id] ASC),
+    CONSTRAINT [FK_Translation_TranslatedMessage] FOREIGN KEY ([TransM_Id]) REFERENCES [dbo].[TranslatedMessage] ([TransM_Id])
+);
+
+
+
+CREATE TABLE [dbo].[StopTimeUpdate] (
+    [ST_Id]                INT           NOT NULL,
+    [stop_sequence]        BIGINT        NULL,
+    [stop_id]              TEXT          NULL,
+    [TP_Id]                INT           NOT NULL,
+    [ScheduleRelationship] NVARCHAR (10) NULL,
+    PRIMARY KEY CLUSTERED ([ST_Id] ASC),
+    CONSTRAINT [FK_StopTimeUpdate_TripUpdate] FOREIGN KEY ([TP_Id]) REFERENCES [dbo].[TripUpdate] ([TP_Id]),
+    CHECK ([ScheduleRelationship]='SCHEDULED' OR [ScheduleRelationship]='SKIPPED' OR [ScheduleRelationship]='NO_DATA')
+);
+
+
+CREATE TABLE [dbo].[StopTimeEvent] (
+    [SE_Id]       INT          NOT NULL,
+    [delay]       BIGINT       NULL,
+    [time]        NUMERIC (20) NOT NULL,
+    [uncertainty] BIGINT       NULL,
+    [ST_Id]       INT          NOT NULL,
+    PRIMARY KEY CLUSTERED ([SE_Id] ASC),
+    UNIQUE NONCLUSTERED ([ST_Id] ASC),
+    CONSTRAINT [FK_StopTimeEvent_StopTimeUpdate] FOREIGN KEY ([ST_Id]) REFERENCES [dbo].[StopTimeUpdate] ([ST_Id])
+);
+
+CREATE TABLE [dbo].[EntitySelector] (
+    [ES_Id]      INT        NOT NULL,
+    [A_Id]       INT        NOT NULL,
+    [agency_Id]  NCHAR (30) NULL,
+    [route_Id]   NCHAR (30) NULL,
+    [route_type] BIGINT     NULL,
+    [TD_Id]      INT        NULL,
+    [stop_Id]    NCHAR (30) NULL,
+    PRIMARY KEY CLUSTERED ([ES_Id] ASC),
+    UNIQUE NONCLUSTERED ([A_Id] ASC),
+    CONSTRAINT [FK_EntitySelector_Alert] FOREIGN KEY ([A_Id]) REFERENCES [dbo].[Alert] ([A_Id]),
+    CONSTRAINT [FK_EntitySelector_TripDescriptor] FOREIGN KEY ([TD_Id]) REFERENCES [dbo].[TripDescriptor] ([TD_Id])
+);
+
+CREATE TABLE [dbo].[Position] (
+    [Pos_Id]    INT        NOT NULL,
+    [VP_Id]     INT        NOT NULL,
+    [Latitude]  FLOAT (53) NOT NULL,
+    [Longitude] FLOAT (53) NOT NULL,
+    [bearing]   FLOAT (53) NULL,
+    [odometer]  FLOAT (53) NULL,
+    [speed]     FLOAT (53) NULL,
+    PRIMARY KEY CLUSTERED ([Pos_Id] ASC),
+    UNIQUE NONCLUSTERED ([VP_Id] ASC),
+    UNIQUE NONCLUSTERED ([VP_Id] ASC),
+    CONSTRAINT [FK_Position_VehiclePosition] FOREIGN KEY ([VP_Id]) REFERENCES [dbo].[VehiclePosition] ([VP_Id])
+);
+
+
+CREATE TABLE [dbo].[TripDescriptor] (
+    [TD_Id]        INT    NOT NULL,
+    [TP_Id]        INT    NULL,
+    [VP_Id]        INT    NOT NULL,
+    [trip_Id]      TEXT   NOT NULL,
+    [route_Id]     TEXT   NULL,
+    [direction_Id] BIGINT NULL,
+    [start_time]   TEXT   NULL,
+    [start_date]   TEXT   NULL,
+    PRIMARY KEY CLUSTERED ([TD_Id] ASC),
+    CONSTRAINT [FK_TripDescriptor_VehiclePosition] FOREIGN KEY ([VP_Id]) REFERENCES [dbo].[VehiclePosition] ([VP_Id]),
+    CONSTRAINT [FK_TripDescriptor_TripUpdate] FOREIGN KEY ([TP_Id]) REFERENCES [dbo].[TripUpdate] ([TP_Id])
+);
+
+CREATE TABLE [dbo].[VehicleDescriptor] (
+    [V_Id]          INT  NOT NULL,
+    [Id]            TEXT NULL,
+    [Label]         TEXT NULL,
+    [License_Plate] TEXT NULL,
+    [VP_Id]         INT  NOT NULL,
+    [TP_Id]         INT  NULL,
+    PRIMARY KEY CLUSTERED ([V_Id] ASC),
+    UNIQUE NONCLUSTERED ([VP_Id] ASC),
+    UNIQUE NONCLUSTERED ([TP_Id] ASC),
+    CONSTRAINT [FK_Table_VehiclePosition] FOREIGN KEY ([VP_Id]) REFERENCES [dbo].[VehiclePosition] ([VP_Id]),
+    CONSTRAINT [FK_Table_TripUpdate] FOREIGN KEY ([TP_Id]) REFERENCES [dbo].[TripUpdate] ([TP_Id])
+);
+

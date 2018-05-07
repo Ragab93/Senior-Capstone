@@ -1,0 +1,10 @@
+Radio Login is the program responsible for taking radio address with route Id and service Id 
+and creating a route table for the radio. When the radio is logged out it is also responsible 
+for removing all entries of the radio from GTFS realtime.
+
+Static database creator is responsible for reading the static text files, creating static 
+feed tables and inserting the information into the tables for use by GTFS realtime.
+
+GTFS realtime is the main program that request JSON files for the radios. With the radios 
+address it checks if the radio already has an entry in the GTFS realtime database and 
+either runs insert of update on the tables for the information.
